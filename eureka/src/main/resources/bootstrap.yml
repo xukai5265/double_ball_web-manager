@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: eurekaserver
+  profiles:
+    active: production
+  cloud:
+    config:
+      uri: http://localhost:8000
+      label: master

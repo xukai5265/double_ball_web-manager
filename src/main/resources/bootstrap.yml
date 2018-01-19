@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: web-manage
+  profiles:
+    active: datasource
+#  cloud:
+#    config:
+#      uri: http://localhost:8000
+#      label: master
+  thymeleaf: 
+    cache : false

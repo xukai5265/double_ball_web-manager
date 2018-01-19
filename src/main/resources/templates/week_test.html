@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <script src="/js/echarts.min.js"></script>
+    <script src="/js/jquery-1.9.1.min.js"></script>
+</head>
+<body>
+<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+<div id="blue_trend" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('blue_trend'));
+    var data = [];
+    var initDate = new Date(2013, 0, 1);
+    var code ='';
+    var i = 0;
+
+    option = {
+        title: {
+            text: '动态数据 + 时间坐标轴'
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter: function (params) {
+                params = params[0];
+                var date = new Date(params.name);
+                return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];
+            },
+            axisPointer: {
+                animation: false
+            }
+        },
+        xAxis: {
+            type: 'time',
+            splitLine: {
+                show: false
+            }
+        },
+        yAxis: {
+            type: 'value',
+            boundaryGap: [0, '100%'],
+            splitLine: {
+                show: false
+            }
+        },
+        series: [{
+            name: '模拟数据',
+            type: 'line',
+            showSymbol: false,
+            hoverAnimation: false,
+            data: data
+        }]
+    };
+
+
+    setInterval(function () {
+//        alert("初始日期："+initDate.getFullYear() +"-"+initDate.getMonth()+"-"+initDate.getDate());
+        var nextDate = initDate;
+        var today = new Date();
+        if(nextDate<today){
+            nextDate.setDate(nextDate.getDate()+1);
+//            alert("下一天："+nextDate.getFullYear() +"-"+nextDate.getMonth()+"-"+nextDate.getDate());
+            var week = nextDate.getDay();
+            if(week==0 || week==2 || week==4){
+//                alert("今天是星期:"+nextDate.getDay());
+                i = i+1;
+                var year = nextDate.getFullYear();
+                if (year == "2013" && i==154){
+                    i=0;
+                }else if(year == "2014" && i==152){
+                    i=0;
+                }else if(year == "2015" && i==154){
+                    i=0;
+                }else if(year == "2016" && i ==153){
+                    i=0;
+                }else if(year =="2017" && i==154){
+                    i=0;
+                }
+
+                if(i<10){
+                    code = year + '00'+i;
+                }else if(i<100){
+                    code = year + '0'+i;
+                }else{
+                    code = year +''+i;
+                }
+
+                var url = 'http://localhost:8080/view/blue/trend/'+code+'';
+                $.ajax({
+                    url: url,
+                    dataType: 'jsonp',
+                    processData: false,
+                    type: 'get',
+                    success: function (data1) {
+                        // 填入数据
+                        if(data.length==20){
+                            data.shift();
+                        }
+                        data.push(data1);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    }
+                });
+            }
+        }
+
+
+
+        myChart.setOption({
+            series: [{
+                data: data
+            }]
+        });
+    }, 1000);
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+	// 时间比较
+
+//	alert("结束....");
+</script>
+</body>
+</html>

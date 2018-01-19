@@ -1,0 +1,36 @@
+server: 
+  port: 8081
+logging: 
+  file: common-microservice-webmanage-1234.log
+  level: 
+    org.springframework.boot.env.PropertySourcesLoader: TRACE
+    org.springframework.web: DEBUG
+# Spring boot UI 页面关闭该应用的权限限制
+management:
+  security:
+    enabled: false
+eureka:
+#  instance:
+#    statusPageUrl: http://localhost:1222/admin
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8888/eureka/
+#数据源：
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/crawler-hx
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+#        ddl-auto: update
+        naming:
+          strategy : org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+#       dialect: com.microservice.persistence.SRDB10Dialect
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+       dialect: org.hibernate.dialect.MySQLDialect
+
