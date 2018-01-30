@@ -426,18 +426,12 @@
                     </div>
                 </div>
                 <div class="span3 statbox green" onTablet="span6" onDesktop="span3">
-                    <div class="boxchart">1,2,6,4,0,8,2,4,5,3,1,7,5</div>
-                    <div class="number">123<i class="icon-arrow-up"></i></div>
-                    <div class="title">sales</div>
-                    <div class="footer">
-                        <a href="#"> read full report</a>
-                    </div>
+                    <div id="currentNums"></div>
                 </div>
                 <div class="span3 statbox yellow noMargin" onTablet="span6" onDesktop="span3">
                     <div>
-                        <input class="btn btn-large" type="button" value="随机一注" onclick="randomOne()">
-                        <br>
-                        <div class="footer" id="randomOne"></div>
+                        <input style="text-align:center" class="btn btn-large" type="button" value="随机一注" onclick="randomOne()">
+                        <div id="randomOne"></div>
                     </div>
                 </div>
                 <div class="span3 statbox blue" onTablet="span6" onDesktop="span3">
@@ -451,13 +445,19 @@
 
             </div>
             <div class="row-fluid">
-                <div class="widget green span4" onTablet="span7" onDesktop="span8">
-                    <h2><span class="glyphicons globe"><i></i></span>各蓝球出现总次数统计</h2>
-                    <div id="main" style="height:300px"></div>
-                </div>
-                <div class="widget blue span7" onTablet="span7" onDesktop="span8">
+                <div class="widget blue" onTablet="span7">
                     <h2><span class="globe"><i></i></span> 蓝球走势图 </h2>
-                    <div id="stats-chart2" style="height:300px;width: 700px;"></div>
+                    <div id="stats-chart2" style="height:300px;width: 1100px;"></div>
+                </div>
+                <!--<div class="widget blue span12" onTablet="span7" onDesktop="span8">-->
+                    <!--<h2><span class="globe"><i></i></span> 蓝球走势图 </h2>-->
+                    <!--<div id="stats-chart2" style="height:300px;width: 940px;"></div>-->
+                <!--</div>-->
+            </div>
+            <div class="row-fluid">
+                <div class="widget green" onTablet="span7">
+                    <h2><span class="glyphicons globe"><i></i></span>各蓝球出现总次数统计</h2>
+                    <div id="main" style="height:300px;width: 1100px;"></div>
                 </div>
             </div>
             <div class="row-fluid">
@@ -597,9 +597,11 @@
     <!-- 引入 ECharts 文件 -->
     <script src="/js/echarts.min.js"></script>
     <script type="text/javascript">
+        <!--蓝球走势图-->
         // 基于准备好的dom，初始化echarts实例
         var myChart1 = echarts.init(document.getElementById('stats-chart2'));
         var data = [];
+        var intervalData = [];
         var now = new Date();
         var initDate = new Date();
         initDate.setFullYear(now.getFullYear() - 1, now.getMonth(), now.getDate());
@@ -607,7 +609,7 @@
         var index = 0;
 
 
-        var url = 'http://localhost:8080/view/blue/info/' + (initDate.getFullYear() - 1) + '';
+        var url = 'http://localhost:8080/view/blue/info/' + initDate.getFullYear() + '';
         $.ajax({
             url: url,
             dataType: 'jsonp',
@@ -616,7 +618,31 @@
             success: function (data1) {
                 // 填入数据
                 for (var j = data1.length - 1; j >= 0; j--) {
-                    data.push(data1[j]);
+                    if(data.length<50){
+                        data.push(data1[j]);
+                    }else{
+                        data.shift();
+                        data.push(data1[j]);
+                    }
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest.status);
+                alert(XMLHttpRequest.readyState);
+                alert(textStatus);
+            }
+        });
+
+        var url = 'http://localhost:8080/view/blue/info/' + (initDate.getFullYear()+1) + '';
+        $.ajax({
+            url: url,
+            dataType: 'jsonp',
+            processData: false,
+            type: 'get',
+            success: function (data1) {
+                // 填入数据
+                for (var j = data1.length - 1; j >= 0; j--) {
+                    intervalData.push(data1[j]);
                 }
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -650,7 +676,7 @@
             },
             yAxis: {
                 type: 'value',
-                boundaryGap: [0, '30%'],
+                boundaryGap: [0, '10%'],
                 splitLine: {
                     show: true
                 }
@@ -666,73 +692,92 @@
 
 
         setInterval(function () {
-            var nextDate = initDate;
-            var today = new Date();
-            if (nextDate < today) {
-                nextDate.setDate(nextDate.getDate() + 1);
-                var week = nextDate.getDay();
-                var year = nextDate.getFullYear();
-                var month = nextDate.getMonth();
-                var day = nextDate.getDate();
-                if (year == "2013" && month == 0 && day == 1) {
-                    index = 0;
-                } else if (year == "2014" && month == 0 && day == 1) {
-                    index = 0;
-                } else if (year == "2015" && month == 0 && day == 1) {
-                    index = 0;
-                } else if (year == "2016" && month == 0 && day == 1) {
-                    index = 0;
-                } else if (year == "2017" && month == 0 && day == 1) {
-                    index = 0;
-                } else if (year == "2018" && month == 0 && day == 1) {
-                    index = 0;
-                }
-                if (week == 0 || week == 2 || week == 4) {
-                    index += 1;
-                    if (index < 10) {
-                        code = year + '00' + index;
-                    } else if (index >= 10 && index < 100) {
-                        code = year + '0' + index;
-                    } else {
-                        code = year + '' + index;
-                    }
-                    var url = 'http://localhost:8080/view/blue/trend/' + code + '';
-                    $.ajax({
-                        url: url,
-                        dataType: 'jsonp',
-                        processData: false,
-                        type: 'get',
-                        success: function (data1) {
-                            if (data1.name != null) {
-                                // 填入数据
-                                if (data.length >= 50) {
-                                    data.shift();
-                                    data.push(data1);
-                                } else {
-                                    data.push(data1);
-                                }
-
-                            }
-                        },
-                        error: function (XMLHttpRequest, textStatus, errorThrown) {
-                            alert(XMLHttpRequest.status);
-                            alert(XMLHttpRequest.readyState);
-                            alert(textStatus);
-                        }
-                    });
+            // 填入数据
+            if(intervalData.length>0){
+                if (data.length >= 30) {
+                    data.shift();
+                    data.push(intervalData.shift());
+                } else {
+                    data.push(intervalData.shift());
                 }
             }
             myChart1.setOption({
-                series: [{
+                    series: [{
                     data: data
                 }]
             });
-        }, 200);
+        }, 500);
+
+// 实时发送ajax请求后端，获取最新数据   优点：可以获取最新数据，缺点：需要多次请求，浪费资源。
+//        setInterval(function () {
+//            var nextDate = initDate;
+//            var today = new Date();
+//            if (nextDate < today) {
+//                nextDate.setDate(nextDate.getDate() + 1);
+//                var week = nextDate.getDay();
+//                var year = nextDate.getFullYear();
+//                var month = nextDate.getMonth();
+//                var day = nextDate.getDate();
+//                if (year == "2013" && month == 0 && day == 1) {
+//                    index = 0;
+//                } else if (year == "2014" && month == 0 && day == 1) {
+//                    index = 0;
+//                } else if (year == "2015" && month == 0 && day == 1) {
+//                    index = 0;
+//                } else if (year == "2016" && month == 0 && day == 1) {
+//                    index = 0;
+//                } else if (year == "2017" && month == 0 && day == 1) {
+//                    index = 0;
+//                } else if (year == "2018" && month == 0 && day == 1) {
+//                    index = 0;
+//                }
+//                if (week == 0 || week == 2 || week == 4) {
+//                    index += 1;
+//                    if (index < 10) {
+//                        code = year + '00' + index;
+//                    } else if (index >= 10 && index < 100) {
+//                        code = year + '0' + index;
+//                    } else {
+//                        code = year + '' + index;
+//                    }
+//                    var url = 'http://localhost:8080/view/blue/trend/' + code + '';
+//                    $.ajax({
+//                        url: url,
+//                        dataType: 'jsonp',
+//                        processData: false,
+//                        type: 'get',
+//                        success: function (data1) {
+//                            if (data1.name != null) {
+//                                // 填入数据
+//                                if (data.length >= 50) {
+//                                    data.shift();
+//                                    data.push(data1);
+//                                } else {
+//                                    data.push(data1);
+//                                }
+//
+//                            }
+//                        },
+//                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+//                            alert(XMLHttpRequest.status);
+//                            alert(XMLHttpRequest.readyState);
+//                            alert(textStatus);
+//                        }
+//                    });
+//                }
+//            }
+//            myChart1.setOption({
+//                series: [{
+//                    data: data
+//                }]
+//            });
+//        }, 200);
 
         // 使用刚指定的配置项和数据显示图表。
         myChart1.setOption(option);
     </script>
     <script type="text/javascript">
+        <!--各蓝球出现总次数统计-->
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
         myChart.setOption({
@@ -780,6 +825,39 @@
         });
     </script>
     <script type="text/javascript">
+        <!--获取本期中奖号码-->
+        var url = 'http://localhost:8080/view/current/nums';
+        $.ajax({
+            url: url,
+            dataType: 'jsonp',
+            processData: false,
+            type: 'get',
+            success: function (data) {
+                // 填入数据
+                var reds = data.red;
+                var currentNumsDiv = document.getElementById("currentNums");
+
+                var rd = "";
+                rd += '<span> 第：'+data.code+' 期 </span>'
+                rd += '<br>'
+                rd += '<br>'
+                rd += '<br>'
+                for(var i =0;i<reds.length;i++){
+                    rd += '<span class="badge red"> '+reds[i]+' </span>'
+                    rd += '&nbsp;'
+                }
+                rd += '<span class="badge blue"> '+data.blue+' </span>'
+                currentNumsDiv.innerHTML = rd;
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest.status);
+                alert(XMLHttpRequest.readyState);
+                alert(textStatus);
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        <!--随机一注-->
         function randomOne() {
             var url = 'http://localhost:8080/doubel_ball/gen';
             $.ajax({
@@ -793,8 +871,10 @@
                     var randomOneDiv = document.getElementById("randomOne");
 
                     var rd = "";
+                    rd+="<br>";
                     for(var i =0;i<reds.length;i++){
                         rd += '<span class="badge red"> '+reds[i]+' </span>'
+                        rd += '&nbsp;'
                     }
                     rd += '<span class="badge blue"> '+data.blue+' </span>'
                     randomOneDiv.innerHTML = rd;
